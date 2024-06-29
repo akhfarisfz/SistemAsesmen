@@ -1,13 +1,20 @@
+import { useFocusEffect } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { TextInput, Button, RadioButton } from 'react-native-paper';
 
-const ProfilSiswa = () => {
+const ProfilSiswa = ({navigation}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [nama, setNama] = useState('');
   const [jenisKelamin, setJenisKelamin] = useState('');
   const [kelas, setKelas] = useState('');
 
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setCurrentPage(1);
+    }, [])
+  );
   const nextPage = () => {
     setCurrentPage(currentPage + 1);
   };
@@ -23,8 +30,7 @@ const ProfilSiswa = () => {
       jenisKelamin,
       kelas,
     });
-    // Di sini Anda dapat menulis logika untuk menyimpan data ke storage atau API
-    // dan juga untuk navigasi ke menampilkan pesan sukses
+    navigation.navigate('Tes Membaca');
   };
 
   return (

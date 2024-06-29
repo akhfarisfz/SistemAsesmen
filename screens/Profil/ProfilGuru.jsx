@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, TextInput, Button, RadioButton } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfilGuru = ({ navigation }) => {
   const [nama, setNama] = useState('');
@@ -10,17 +11,44 @@ const ProfilGuru = ({ navigation }) => {
   const [kabupaten, setKabupaten] = useState('');
   const [provinsi, setProvinsi] = useState('');
 
-  const handleSubmit = () => {
-    // Logika untuk mengirim data
-    console.log({
-      nama,
-      satuanPendidikan,
-      bentukSatuanPendidikan,
-      kecamatan,
-      kabupaten,
-      provinsi,
-    });
-    navigation.navigate('ProfilSiswa'); // Navigasi ke layar ProfilSiswa saat tombol ditekan
+  useEffect(() => {
+    const fetchStoredData = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem('dataGuru');
+        if (storedData) {
+          const parsedData = JSON.parse(storedData);
+          setNama(parsedData.nama || '');
+          setSatuanPendidikan(parsedData.satuanPendidikan || '');
+          setBentukSatuanPendidikan(parsedData.bentukSatuanPendidikan || 'MI');
+          setKecamatan(parsedData.kecamatan || '');
+          setKabupaten(parsedData.kabupaten || '');
+          setProvinsi(parsedData.provinsi || '');
+        }
+      } catch (error) {
+        console.error('Gagal mengambil data dari local storage:', error);
+      }
+    };
+
+    fetchStoredData();
+  }, []);
+
+  const handleSubmit = async () => {
+    // Simpan data ke local storage
+    try {
+      const data = {
+        nama,
+        satuanPendidikan,
+        bentukSatuanPendidikan,
+        kecamatan,
+        kabupaten,
+        provinsi,
+      };
+      await AsyncStorage.setItem('dataGuru', JSON.stringify(data));
+      console.log('Data guru berhasil disimpan:', data);
+      navigation.navigate('Profil Siswa'); // Navigasi ke layar ProfilSiswa saat tombol ditekan
+    } catch (error) {
+      console.error('Gagal menyimpan data guru:', error);
+    }
   };
 
   return (

@@ -18,13 +18,13 @@ const Mode = ({ navigation }) => {
   const handleInstrumenAsesmen = async () => {
     await AsyncStorage.setItem('mode', 'Testing');
     setCurrentMode('Testing');
-    navigation.navigate('ProfilGuru');
+    navigation.navigate('Profil Guru');
   };
 
   const handleAsesmenRiil = async () => {
     await AsyncStorage.setItem('mode', 'Riil');
     setCurrentMode('Riil');
-    navigation.navigate('ProfilGuru');
+    navigation.navigate('Profil Guru');
   };
 
   return (
@@ -36,7 +36,7 @@ const Mode = ({ navigation }) => {
         style={[styles.button, { backgroundColor: '#007BFF' }]}
         labelStyle={{ color: 'white', fontSize: 18 }}
       >
-        Saya sedang mencoba instrumen asesmen
+        Saya ingin mencoba
       </Button>
       <Button
         mode="contained"
@@ -44,9 +44,9 @@ const Mode = ({ navigation }) => {
         style={[styles.button, { backgroundColor: '#DC3545' }]}
         labelStyle={{ color: 'white', fontSize: 18 }}
       >
-        Saya sedang melakukan asesmen riil kepada siswa
+        Saya melakukan asesmen sebenarnya
       </Button>
-      <Text style={styles.currentMode}>Mode saat ini: {currentMode}</Text>
+      {/* <Text style={styles.currentMode}>Mode saat ini: {currentMode}</Text> */}
     </View>
   );
 };
@@ -59,8 +59,9 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   button: {
-    marginTop: 20,
     width: '100%',
+    paddingVertical:20,
+    marginVertical:10,
     justifyContent: 'center',
     borderRadius: 10,
   },

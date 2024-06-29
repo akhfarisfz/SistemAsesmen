@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity,Image} from 'react-native';
 
 const HomeScreen = ({ navigation }) => {
   const nextSlide = () => {
-    navigation.navigate('PetunjukPenggunaan'); // Navigasi ke layar SurveyScreen saat tombol ditekan
+    navigation.navigate('Petunjuk Penggunaan'); // Navigasi ke layar SurveyScreen saat tombol ditekan
   };
 
   return (
@@ -20,7 +20,7 @@ const HomeScreen = ({ navigation }) => {
       <Text style={styles.item}>1. <Text style={styles.bold}>Tingkat Mahir</Text>. Pada tingkat ini, siswa telah mampu mengevaluasi dan merefleksi bacaan dan menghubungkannya dengan kehidupan sehari-hari. </Text>
       <Text style={styles.item}>2. <Text style={styles.bold}>Tingkat Cakap</Text>. Pada tingkat ini, siswa mampu menemukan informasi tersirat, membandingkan dan menyimpulkan bacaan.</Text>
       <Text style={styles.item}>3. <Text style={styles.bold}>Tingkat Dasar</Text>. Pada tingkat ini, siswa mampu menemukan informasi yang tersurat dalam bacaan.</Text>
-      <Text style={styles.item}>4. <Text style={styles.bold}>Tingkat Intervensi Khusus</Text>. Pada tingkat ini, siswa mampu menemukan informasi yang tersurat dalam bacaan.</Text>
+      <Text style={styles.item}>4. <Text style={styles.bold}>Tingkat Intervensi Khusus</Text>. Pada tingkat ini, siswa mampu menemukan informasi yang tersurat dalam bacaan.Tingkat ini dibagi ke dalam 5 level: 1) Pemula; 2) Huruf; 3) Kata; 4) Paragraf; 5) Cerita.</Text>
       <Text style={styles.paragraph}>Di akhir asesmen, berdasarkan tingkat kompetensi membaca siswa yang teridentifikasi, akan diberikan rekomendasi pembelajaran yang yang sesuai untuk membantu siswa meningkatkan kompetensi membacanya.</Text>
       <TouchableOpacity style={styles.button} onPress={nextSlide}>
         <Text style={styles.buttonText}>Next</Text>

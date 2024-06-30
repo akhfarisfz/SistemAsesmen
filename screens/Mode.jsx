@@ -8,20 +8,22 @@ const Mode = ({ navigation }) => {
 
   useEffect(() => {
     const fetchMode = async () => {
-      const mode = await AsyncStorage.getItem('mode');
-      setCurrentMode(mode);
+      const mode = await AsyncStorage.getItem('Mode');
+      if (mode) {
+        setCurrentMode(mode);
+      }
     };
     fetchMode();
   }, []);
 
   const handleInstrumenAsesmen = async () => {
-    await AsyncStorage.setItem('mode', 'Testing');
+    await AsyncStorage.setItem('Mode', 'Testing');
     setCurrentMode('Testing');
     navigation.navigate('Profil Guru');
   };
 
   const handleAsesmenRiil = async () => {
-    await AsyncStorage.setItem('mode', 'Riil');
+    await AsyncStorage.setItem('Mode', 'Riil');
     setCurrentMode('Riil');
     navigation.navigate('Profil Guru');
   };
@@ -45,6 +47,9 @@ const Mode = ({ navigation }) => {
       >
         Saya ingin tes sekarang
       </Button>
+      {currentMode !== '' && (
+        <Text style={styles.currentMode}>Mode saat ini: {currentMode}</Text>
+      )}
     </View>
   );
 };
@@ -64,8 +69,8 @@ const styles = StyleSheet.create({
   },
   button: {
     width: '100%',
-    paddingVertical:20,
-    marginVertical:10,
+    paddingVertical: 20,
+    marginVertical: 10,
     justifyContent: 'center',
     borderRadius: 10,
   },

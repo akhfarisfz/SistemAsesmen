@@ -1,36 +1,31 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Button } from 'react-native-paper';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import data from '../../data'; // Pastikan path sesuai dengan struktur proyek Anda
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons'; 
 
-const MembacaHuruf = ({ route,navigation }) => {
-  const{id}=route.params;
+
+const MembacaHuruf = ({ route, navigation }) => {
+  const { id } = route.params;
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedLetters, setSelectedLetters] = useState({});
   const [score, setScore] = useState(20);
+  const [isBackPressed, setIsBackPressed] = useState(false);
+
   const handleSubmit = async () => {
-    const newKategori = 'Intervensi Khusus Tingkat Huruf'; 
-    navigation.navigate('Hasil Asesmen', { Kategori: newKategori, scoreHuruf: score ,id:id});
+    const newKategori = 'Intervensi Khusus Tingkat Huruf';
+    navigation.navigate('Hasil Asesmen', { Kategori: newKategori, scoreHuruf: score, id: id });
   };
 
-  const simpanHasilTesKeDataJs = (kategori, selectedLetters, score) => {
-    // Memasukkan hasil tes huruf ke data.js
-    const indexSiswa = data.Asesmen.length - 1; // Ambil index siswa terakhir
-    data.Asesmen[indexSiswa].MembacaHuruf = {
-      jawaban: selectedLetters,
-      score: score,
-      kategori: kategori,
-    };
+  const handleBack = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else {
+      navigation.goBack();
+    }
   };
-
   const nextPage = () => {
     setCurrentPage(currentPage + 1);
   };
 
-  const previousPage = () => {
-    setCurrentPage(currentPage - 1);
-  };
 
   // Data huruf untuk tes membaca huruf
   const dataSoalHuruf = [
@@ -75,16 +70,39 @@ const MembacaHuruf = ({ route,navigation }) => {
       {currentPage === 1 && (
         <View>
           <Text style={styles.title}>Petunjuk Membaca Huruf</Text>
-          <Text style={styles.item}>{`\u2022 `}Di halaman berikut, akan tampil huruf-huruf yang harus dibaca siswa.</Text>
-          <Text style={styles.item}>{`\u2022 `}Mintalah siswa membaca semua huruf satu persatu, dari kiri ke kanan. Mulai dari baris pertama berlanjut ke baris berikutnya dan seterusnya.</Text>
-          <Text style={styles.item}>{`\u2022 `}<Text style={styles.bold}>Tekan huruf </Text> Jika siswa tidak bisa menyebutkan huruf dan <Text style={styles.bold}>biarkan</Text> apabila siswa dapat menyebutkan huruf.</Text>
-          <Text style={styles.item}>{`\u2022 `}Jika siswa tidak selesai membaca suatu huruf lebih dari 3 detik, maka dianggap salah. Mintalah siswa melanjutkan ke huruf berikutnya.</Text>
-          <Button mode='outlined' onPress={nextPage}>Next</Button>
+          <View style={styles.itemContainer}>
+            <Text style={styles.bullet}>•</Text>
+            <Text style={styles.item}>Di halaman berikut, akan tampil huruf-huruf yang harus dibaca siswa.</Text>
+          </View>
+          <View style={styles.itemContainer}>
+            <Text style={styles.bullet}>•</Text>
+            <Text style={styles.item}>Mintalah siswa membaca semua huruf satu persatu, dari kiri ke kanan. Mulai dari baris pertama berlanjut ke baris berikutnya dan seterusnya.</Text>
+          </View>
+          <View style={styles.itemContainer}>
+            <Text style={styles.bullet}>•</Text>
+            <Text style={styles.item}><Text style={styles.bold}>Tekan huruf </Text> Jika siswa tidak bisa menyebutkan huruf dan <Text style={styles.bold}>biarkan</Text> apabila siswa dapat menyebutkan huruf.</Text>
+          </View>
+          <View style={styles.itemContainer}>
+            <Text style={styles.bullet}>•</Text>
+            <Text style={styles.item}>Jika siswa tidak selesai membaca suatu huruf lebih dari 3 detik, maka dianggap salah. Mintalah siswa melanjutkan ke huruf berikutnya.</Text>
+          </View>
+          <TouchableOpacity style={styles.button} onPress={nextPage}>
+            <Text style={styles.buttonText}>Next</Text>
+          </TouchableOpacity>
         </View>
       )}
 
       {currentPage === 2 && (
         <View>
+          <TouchableOpacity
+            style={[styles.backButton, isBackPressed && styles.backButtonPressed]}
+            onPressIn={() => setIsBackPressed(true)}
+            onPressOut={() => setIsBackPressed(false)}
+            onPress={handleBack}
+          >
+            <Icon name="arrow-back" size={24} color="#FFFFFF" />
+            <Text style={styles.backButtonText}>Back</Text>
+          </TouchableOpacity>
           <Text style={styles.title}>Membaca Huruf</Text>
           <View style={styles.lettersContainer}>
             {dataSoalHuruf.map((letter) => (
@@ -100,8 +118,9 @@ const MembacaHuruf = ({ route,navigation }) => {
               </Text>
             ))}
           </View>
-          <Button mode='outlined' onPress={previousPage}>Previous</Button>
-          <Button mode='outlined' onPress={handleSubmit}>Submit</Button>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Submit</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
@@ -125,6 +144,14 @@ const styles = StyleSheet.create({
   item: {
     fontSize: 16,
     marginBottom: 10,
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 10,
+  },
+  bullet: {
+    marginRight: 5,
   },
   bold: {
     fontWeight: 'bold'
@@ -153,5 +180,38 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: 20,
-  }
+  },
+  button: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#0F67B1',
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0F67B1',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginBottom: 50,
+    width: 100,
+  },
+  backButtonPressed: {
+    backgroundColor: '#FFFFFF',
+  },
+  backButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    marginLeft: 10,
+  },
 });

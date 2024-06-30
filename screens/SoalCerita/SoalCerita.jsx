@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { Button, Checkbox, RadioButton } from 'react-native-paper';
 import gambarSoalCerita from '../../assets/GambarSoalCerita.png'
 
@@ -17,6 +17,7 @@ const SoalCerita = ({ route, navigation }) => {
     const [checkedCakap5, setCheckedCakap5] = useState(false);
 
     const [selectedValue, setSelectedValue] = useState('option1');
+    const [errorMessage, setErrorMessage] = useState('');
 
     const handleSubmitDasar = () => {
         if (checkedDasar1 && checkedDasar2) {
@@ -39,18 +40,21 @@ const SoalCerita = ({ route, navigation }) => {
 
         }
     };
-    const handleSubmitMahir = (value) => {
-        console.log('Selected Value:', selectedValue);
-        if (selectedValue == 'benar') {
-            let newKategori = 'Tingkat Mahir';
-            navigation.navigate('Hasil Asesmen', { Kategori: newKategori, id:id }); // Navigasi dengan Kategori yang sudah dimodifikasi
-        }
-        else{
-            let newKategori = 'Tingkat Cakap';
-            navigation.navigate('Hasil Asesmen', { Kategori: newKategori, id:id }); // Navigasi dengan Kategori yang sudah dimodifikasi
+    const handleSubmitMahir = () => {
+        if (!selectedValue) {
+            setErrorMessage('Silakan pilih jawaban.');
+            return;
         }
 
+        if (selectedValue === 'benar') {
+            let newKategori = 'Tingkat Mahir';
+            navigation.navigate('Hasil Asesmen', { Kategori: newKategori, id: id });
+        } else {
+            let newKategori = 'Tingkat Cakap';
+            navigation.navigate('Hasil Asesmen', { Kategori: newKategori, id: id });
+        }
     };
+
     const nextPage = () => {
         setCurrentPage(currentPage + 1);
     };
@@ -67,7 +71,9 @@ const SoalCerita = ({ route, navigation }) => {
                     <Text style={styles.item}>{`\u2022`} Siswa telah mampu membaca dengan lancar. Selanjutnya adalah mengukur kemampuan siswa memahami bacaan.</Text>
                     <Text style={styles.item}>{`\u2022`} Di halaman berikutnya, akan tampil teks bacaan dengan ilustrasi.</Text>
                     <Text style={styles.item}>{`\u2022`} Minta siswa membaca dan menjawab pertanyaan di bawahnya.</Text>
-                    <Button mode='outlined' onPress={nextPage}>Next</Button>
+                    <TouchableOpacity style={styles.button} onPress={nextPage}>
+                        <Text style={styles.buttonText}>Next</Text>
+                    </TouchableOpacity>
                 </ScrollView>
             )}
             {currentPage == 2 && (
@@ -212,6 +218,7 @@ const SoalCerita = ({ route, navigation }) => {
                                 <Text>Salah</Text>
                             </View>
                         </RadioButton.Group>
+                        {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
                         <Button mode="contained" onPress={handleSubmitMahir}>
                             Submit
                         </Button>
@@ -268,5 +275,16 @@ const styles = StyleSheet.create({
     area: {
         marginVertical: 20,
         fontSize: 22
-    }
+    },
+    button: {
+        marginTop: 20,
+        padding: 10,
+        backgroundColor: '#0F67B1',
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+    },
 });

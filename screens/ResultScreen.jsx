@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Button, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Image } from 'react-native';
+import { Button, Icon } from 'react-native-elements';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ResultScreen = ({ route, navigation }) => {
@@ -7,53 +8,70 @@ const ResultScreen = ({ route, navigation }) => {
 
   const [dataGuru, setDataGuru] = useState(null);
   const [FinalData, setFinalData] = useState('');
-  const [loading, setLoading] = useState(true); // State untuk menampilkan loading
-  let id_now=id-1;
-  console.log(id)
+  const [loading, setLoading] = useState(true);
+  const [randomImage, setRandomImage] = useState(null);
+  const [mode, setMode] = useState('');
+
+  const images = [
+    require('../assets/1.png'),
+    require('../assets/2.png'),
+    require('../assets/3.png'),
+    require('../assets/4.png'),
+    require('../assets/5.png')
+  ];
+
   useEffect(() => {
-    const fetchAndStoreFinalData = async () => {
+    const fetchModeAndFinalData = async () => {
       try {
-        const jsonValue = await AsyncStorage.getItem('FinalData');
-        let finalData = jsonValue != null ? JSON.parse(jsonValue) : null;
-        setFinalData(finalData);
-        if (finalData) {
-          if (finalData.Guru) {
-            const { nama, satuanPendidikan, bentukSatuanPndidikan, kecamatan, kabupaten, provinsi } = finalData.Guru;
-            setDataGuru({
-              nama,
-              satuanPendidikan,
-              bentukSatuanPndidikan,
-              kecamatan,
-              kabupaten,
-              provinsi,
-            });
-          }
+        const modeValue = await AsyncStorage.getItem('Mode');
+        setMode(modeValue);
 
-          // Update the specific assessment with Kategori based on id
-          finalData.Asesmen = finalData.Asesmen.map((asesmen) => {
-            if (asesmen.id === id) {
-              return {
-                ...asesmen,
-                Kategori: Kategori,
-              };
+        // Jika mode 'Testing', tidak perlu melakukan fetch FinalData
+        if (modeValue !== 'Testing') {
+          const jsonValue = await AsyncStorage.getItem('FinalData');
+          let finalData = jsonValue != null ? JSON.parse(jsonValue) : null;
+          setFinalData(finalData);
+          if (finalData) {
+            if (finalData.Guru) {
+              const { nama, satuanPendidikan, bentukSatuanPndidikan, kecamatan, kabupaten, provinsi } = finalData.Guru;
+              setDataGuru({
+                nama,
+                satuanPendidikan,
+                bentukSatuanPndidikan,
+                kecamatan,
+                kabupaten,
+                provinsi,
+              });
             }
-            return asesmen;
-          });
 
-          // Store updated finalData back to AsyncStorage
-          await AsyncStorage.setItem('FinalData', JSON.stringify(finalData));
+            finalData.Asesmen = finalData.Asesmen.map((asesmen) => {
+              if (asesmen.id === id) {
+                return {
+                  ...asesmen,
+                  Kategori: Kategori,
+                };
+              }
+              return asesmen;
+            });
 
-          // Set FinalData state and indicate that loading has finished
-          setLoading(false);
+            await AsyncStorage.setItem('FinalData', JSON.stringify(finalData));
+          }
         }
+
+        setLoading(false);
       } catch (error) {
-        console.error('Error fetching or storing FinalData from AsyncStorage:', error);
-        setLoading(false); // Set loading to false in case of error
+        console.error('Error fetching or storing data from AsyncStorage:', error);
+        setLoading(false);
       }
     };
 
-    fetchAndStoreFinalData();
+    fetchModeAndFinalData();
   }, [Kategori, id]);
+
+  useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * images.length);
+    setRandomImage(images[randomIndex]);
+  }, []);
 
   if (loading) {
     return (
@@ -63,22 +81,72 @@ const ResultScreen = ({ route, navigation }) => {
     );
   }
 
-  // Render UI when FinalData is available
   return (
     <View style={styles.container}>
-      <Text style={styles.resultText}>Terimakasih</Text>
-      
-      <Text style={styles.resultText}>Kategori: {Kategori}</Text>
-      <Text style={styles.resultText}>Skor Huruf: {scoreHuruf}</Text>
-      <Text style={styles.resultText}>Jawaban: {Jawaban}</Text>
+      <Text style={styles.title}>Selamat !</Text>
+      <Text style={styles.resultText}>Kamu telah menyelesaikan asesmen ini</Text>
+  
+      {randomImage && <Image source={randomImage} style={styles.logo} />}
+      <Text style={styles.resultText}>Kategori Literasimu :</Text>
+      <Text style={[styles.resultText, styles.bold]}>{Kategori} </Text>
       <Text style={styles.resultText}>Asesmen telah berakhir</Text>
-      
-      <Button title="Lihat Hasil" onPress={() => navigation.navigate('Tampil Hasil')} />
-      <Button title="Tambah Data" onPress={() => navigation.navigate('Profil Siswa', { dataGuru, FinalData })} />
+  
+      {!loading && (
+        <View style={styles.buttonContainer}>
+          {mode !== 'Testing' ? (
+            <>
+              <Button
+                title="Lihat Hasil"
+                onPress={() => navigation.navigate('Tampil Hasil')}
+                icon={
+                  <Icon
+                    name="eye"
+                    type="font-awesome"
+                    size={15}
+                    color="white"
+                    style={{ marginRight: 10 }}
+                  />
+                }
+                buttonStyle={styles.button}
+              />
+              <Button
+                title="Tambah Data Siswa"
+                onPress={() => navigation.navigate('Profil Siswa', { dataGuru, FinalData })}
+                icon={
+                  <Icon
+                    name="plus"
+                    type="font-awesome"
+                    size={15}
+                    color="white"
+                    style={{ marginRight: 10 }}
+                  />
+                }
+                buttonStyle={styles.button}
+              />
+            </>
+          ) : (
+            <Button
+              title="Kembali ke pilihan Mode"
+              onPress={() => navigation.navigate('Mode')}
+              icon={
+                <Icon
+                  name="arrow-left"
+                  type="font-awesome"
+                  size={15}
+                  color="white"
+                  style={{ marginRight: 10 }}
+                />
+              }
+              buttonStyle={styles.button}
+            />
+          )}
+        </View>
+      )}
     </View>
   );
-};
+  
 
+};
 export default ResultScreen;
 
 const styles = StyleSheet.create({
@@ -89,9 +157,35 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
   },
+  bold: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    margin: 10,
+  },
   resultText: {
     fontSize: 18,
     marginBottom: 20,
     textAlign: 'center',
+  },
+  logo: {
+    width: 220, // Sesuaikan dengan ukuran logo Anda
+    height: 220, // Sesuaikan dengan ukuran logo Anda
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  button: {
+    backgroundColor: '#0F67B1',
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderRadius: 5,
+    marginHorizontal: 10,
   },
 });

@@ -1,5 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { TextInput, Button, RadioButton } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,6 +12,19 @@ const ProfilSiswa = ({ route, navigation }) => {
   const [kelas, setKelas] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  const [mode, setMode] = useState('');
+
+  useEffect(() => {
+    const fetchMode = async () => {
+      try {
+        const modeValue = await AsyncStorage.getItem('Mode');
+        setMode(modeValue);
+      } catch (error) {
+        console.error('Failed to fetch mode:', error);
+      }
+    };
+    fetchMode();
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -59,37 +72,39 @@ const ProfilSiswa = ({ route, navigation }) => {
     setIsSubmitting(true);
 
     try {
-      let finalData = await AsyncStorage.getItem('FinalData');
-      if (!finalData) {
-        finalData = {
-          Guru: dataGuru,
-          Asesmen: [],
+      if (mode !== 'Testing') {
+        let finalData = await AsyncStorage.getItem('FinalData');
+        if (!finalData) {
+          finalData = {
+            Guru: dataGuru,
+            Asesmen: [],
+          };
+        } else {
+          finalData = JSON.parse(finalData);
+        }
+
+        const asesmenBaru = {
+          id: finalData.Asesmen.length + 1, // Menggunakan panjang array untuk id baru
+          Nama_siswa: nama,
+          JenisKelamin: jenisKelamin,
+          Kelas: kelas,
+          Kategori: null, 
+          MembacaTeks: { jawaban: {} },
+          MembacaHuruf: { jawaban: {} },
+          MembacaParagraf: { jawaban: {} },
         };
+
+        finalData.Asesmen.push(asesmenBaru);
+
+        await AsyncStorage.setItem('FinalData', JSON.stringify(finalData));
+        console.log('Data tersimpan:', finalData.Asesmen);
+
+        navigation.navigate('Tes Membaca', { FinalData: finalData, id: asesmenBaru.id });
       } else {
-        finalData = JSON.parse(finalData);
+        console.log('Mode testing, tidak menyimpan data.');
+        navigation.navigate('Tes Membaca', { id: 0 });
+
       }
-
-      const asesmenBaru = {
-        id: finalData.Asesmen.length + 1, // Menggunakan panjang array untuk id baru
-        Nama_siswa: nama,
-        JenisKelamin: jenisKelamin,
-        Kelas: kelas,
-        Kategori: null, 
-        MembacaTeks: { jawaban: {} },
-        MembacaHuruf: { jawaban: {} },
-        MembacaParagraf: { jawaban: {} },
-      };
-
-      let id = asesmenBaru.id;
-
-      finalData.Asesmen.push(asesmenBaru);
-
-      await AsyncStorage.setItem('FinalData', JSON.stringify(finalData));
-      console.log(finalData.Asesmen)
-
-      console.log(id)
-      navigation.navigate('Tes Membaca', { FinalData: finalData, id: id });
-      
     } catch (error) {
       console.error('Failed to save data:', error);
       // Handle error if saving fails

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Text, TextInput, Button, RadioButton } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // Mengimpor ikon dari react-native-vector-icons
+import { Text, TextInput, RadioButton } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfilGuru = ({ route, navigation }) => {
   const [nama, setNama] = useState('');
@@ -10,10 +11,31 @@ const ProfilGuru = ({ route, navigation }) => {
   const [kecamatan, setKecamatan] = useState('');
   const [kabupaten, setKabupaten] = useState('');
   const [provinsi, setProvinsi] = useState('');
-
   const [errors, setErrors] = useState({});
-
   const [isBackPressed, setIsBackPressed] = useState(false);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const finalData = await AsyncStorage.getItem('FinalData');
+        if (finalData) {
+          const parsedData = JSON.parse(finalData);
+          if (parsedData && parsedData.Guru) {
+            setNama(parsedData.Guru.Nama_Guru || '');
+            setSatuanPendidikan(parsedData.Guru.Satuan_pendidikan || '');
+            setBentukSatuanPendidikan(parsedData.Guru.BentukSatuan || 'MI');
+            setKecamatan(parsedData.Guru.Kecamatan || '');
+            setKabupaten(parsedData.Guru.Kabupaten || '');
+            setProvinsi(parsedData.Guru.Provinsi || '');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load data:', error);
+      }
+    };
+
+    loadData();
+  }, []);
 
   const validateInputs = () => {
     const newErrors = {};
@@ -29,15 +51,25 @@ const ProfilGuru = ({ route, navigation }) => {
   const handleSubmit = async () => {
     if (validateInputs()) {
       const dataGuru = {
-        nama,
-        satuanPendidikan,
-        bentukSatuanPendidikan,
-        kecamatan,
-        kabupaten,
-        provinsi,
+        Nama_Guru: nama,
+        Satuan_pendidikan: satuanPendidikan,
+        BentukSatuan: bentukSatuanPendidikan,
+        Kecamatan: kecamatan,
+        Kabupaten: kabupaten,
+        Provinsi: provinsi,
       };
 
-      navigation.navigate('Profil Siswa', { dataGuru: dataGuru });
+      try {
+        const finalData = await AsyncStorage.getItem('FinalData');
+        if (finalData) {
+          const parsedData = JSON.parse(finalData);
+          parsedData.Guru = dataGuru;
+          await AsyncStorage.setItem('FinalData', JSON.stringify(parsedData));
+        }
+        navigation.navigate('Profil Siswa', { dataGuru: dataGuru });
+      } catch (error) {
+        console.error('Failed to save data:', error);
+      }
     }
   };
 

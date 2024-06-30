@@ -48,7 +48,7 @@ const SurveyScreen = () => {
       Alert.alert('Info', 'Tidak ada data Asesmen untuk diekspor.');
       return;
     }
-
+  
     try {
       let htmlContent = `
         <html>
@@ -71,7 +71,7 @@ const SurveyScreen = () => {
             <table>
               <tr><th>Nama Siswa</th><th>Jenis Kelamin</th><th>Kelas</th><th>Kategori</th></tr>
       `;
-
+  
       finalData.Asesmen.forEach(item => {
         htmlContent += `
           <tr>
@@ -82,28 +82,31 @@ const SurveyScreen = () => {
           </tr>
         `;
       });
-
+  
       htmlContent += `
             </table>
           </body>
         </html>
       `;
-
+  
       const { uri } = await Print.printToFileAsync({ html: htmlContent });
-
+  
+      // Menyimpan ke galeri setelah diekspor
+      await saveFileToGallery(uri, 'pdf', 'PDF');
+  
       Alert.alert('Sukses', `PDF berhasil diekspor. File tersimpan di: ${uri}`);
     } catch (error) {
       console.error('Error exporting to PDF:', error);
       Alert.alert('Error', 'Gagal mengekspor ke PDF.');
     }
   };
-
+  
   const exportToExcel = async () => {
     if (!finalData || !finalData.Asesmen) {
       Alert.alert('Info', 'Tidak ada data Asesmen untuk diekspor.');
       return;
     }
-
+  
     const header = ['Nama Siswa', 'Jenis Kelamin', 'Kelas', 'Kategori'];
     const data = finalData.Asesmen.map(item => [
       item.Nama_siswa,
@@ -111,38 +114,97 @@ const SurveyScreen = () => {
       item.Kelas,
       item.Kategori,
     ]);
-
+  
     const ws = XLSX.utils.aoa_to_sheet([header, ...data]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Asesmen');
-
+  
     const wbout = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
-    const uri = FileSystem.documentDirectory + 'Asesmen.xlsx'; // Simpan di direktori dokumen
-
+    const fileName = 'Asesmen.xlsx';
+    const uri = FileSystem.documentDirectory + fileName;
+  
     try {
       await FileSystem.writeAsStringAsync(uri, wbout, {
         encoding: FileSystem.EncodingType.Base64,
       });
-
+  
       // Pindahkan file ke direktori 'Download' menggunakan downloadAsync
-      const downloadDest = `${FileSystem.documentDirectory}Download/Asesmen.xlsx`;
+      const downloadDest = `${FileSystem.documentDirectory}Download/${fileName}`;
       await FileSystem.downloadAsync(uri, downloadDest);
-
-      // Bagikan atau simpan ke galeri
-      const permission = await MediaLibrary.requestPermissionsAsync();
-      if (permission.granted) {
-        const asset = await MediaLibrary.createAssetAsync(downloadDest);
-        await MediaLibrary.createAlbumAsync('Download', asset, false);
-      } else {
-        Alert.alert('Info', 'Izin akses galeri diperlukan untuk menyimpan file.');
-      }
-
+  
+      // Menyimpan ke galeri setelah diekspor
+      await saveFileToGallery(downloadDest, 'xlsx', 'Excel');
+  
       Alert.alert('Sukses', 'Data berhasil diekspor dan disimpan di galeri.');
     } catch (error) {
       console.error('Error exporting to Excel:', error);
       Alert.alert('Error', 'Gagal mengekspor ke Excel dan menyimpan di galeri.');
     }
   };
+  
+  const saveFileToGallery = async (fileUri, fileType, fileTypeDisplay) => {
+    try {
+      const permission = await MediaLibrary.requestPermissionsAsync();
+      if (permission.granted) {
+        const asset = await MediaLibrary.createAssetAsync(fileUri);
+        await MediaLibrary.createAlbumAsync('Download', asset, false);
+        Alert.alert('Sukses', `${fileTypeDisplay} berhasil disimpan di galeri.`);
+      } else {
+        Alert.alert('Info', `Izin akses galeri diperlukan untuk menyimpan file ${fileType}.`);
+      }
+    } catch (error) {
+      console.error(`Error saving ${fileType} to gallery:`, error);
+      Alert.alert('Error', `Gagal menyimpan file ${fileTypeDisplay} di galeri.`);
+    }
+  };
+  
+  // const exportToExcel = async () => {
+  //   if (!finalData || !finalData.Asesmen) {
+  //     Alert.alert('Info', 'Tidak ada data Asesmen untuk diekspor.');
+  //     return;
+  //   }
+  
+  //   const header = ['Nama Siswa', 'Jenis Kelamin', 'Kelas', 'Kategori'];
+  //   const data = finalData.Asesmen.map(item => [
+  //     item.Nama_siswa,
+  //     item.JenisKelamin,
+  //     item.Kelas,
+  //     item.Kategori,
+  //   ]);
+  
+  //   const ws = XLSX.utils.aoa_to_sheet([header, ...data]);
+  //   const wb = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(wb, ws, 'Asesmen');
+  
+  //   const wbout = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
+  //   const fileName = 'Asesmen.xlsx';
+  //   const uri = FileSystem.documentDirectory + fileName;
+  
+  //   try {
+  //     await FileSystem.writeAsStringAsync(uri, wbout, {
+  //       encoding: FileSystem.EncodingType.Base64,
+  //     });
+  
+  //     // Pindahkan file ke direktori 'Download' menggunakan downloadAsync
+  //     const downloadDest = `${FileSystem.documentDirectory}Download/${fileName}`;
+  //     await FileSystem.downloadAsync(uri, downloadDest);
+  
+  //     // Bagikan atau simpan ke galeri
+  //     const permission = await MediaLibrary.requestPermissionsAsync();
+  //     if (permission.granted) {
+  //       const asset = await MediaLibrary.createAssetAsync(downloadDest);
+  //       await MediaLibrary.createAlbumAsync('Download', asset, false);
+  //     } else {
+  //       Alert.alert('Info', 'Izin akses galeri diperlukan untuk menyimpan file.');
+  //     }
+  
+  //     Alert.alert('Sukses', 'Data berhasil diekspor dan disimpan di galeri.');
+  //   } catch (error) {
+  //     console.error('Error exporting to Excel:', error);
+  //     Alert.alert('Error', 'Gagal mengekspor ke Excel dan menyimpan di galeri.');
+  //   }
+  // };
+  
 
 
 

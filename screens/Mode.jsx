@@ -11,7 +11,6 @@ const Mode = ({ navigation }) => {
       const mode = await AsyncStorage.getItem('mode');
       setCurrentMode(mode);
     };
-
     fetchMode();
   }, []);
 
@@ -29,7 +28,7 @@ const Mode = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text>Saat ini anda ingin menggunakan aplikasi ini secara apa?</Text>
+      <Text style={styles.title}>Saat ini anda ingin menggunakan aplikasi ini secara apa?</Text>
       <Button
         mode="contained"
         onPress={handleInstrumenAsesmen}
@@ -44,9 +43,8 @@ const Mode = ({ navigation }) => {
         style={[styles.button, { backgroundColor: '#DC3545' }]}
         labelStyle={{ color: 'white', fontSize: 18 }}
       >
-        Saya melakukan asesmen sebenarnya
+        Saya ingin tes sekarang
       </Button>
-      {/* <Text style={styles.currentMode}>Mode saat ini: {currentMode}</Text> */}
     </View>
   );
 };
@@ -57,6 +55,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginVertical: 20,
+    textAlign: 'center',
   },
   button: {
     width: '100%',

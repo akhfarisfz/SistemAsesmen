@@ -1,75 +1,193 @@
-import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function SurveyScreen({ navigation }) {
-  const handleSurveySubmit = (answer) => {
-    navigation.navigate('Result', { answer });
+const SurveyScreen = () => {
+  const [finalData, setFinalData] = useState(null);
+  const [asesmenCount, setAsesmenCount] = useState(0);
+
+  useEffect(() => {
+    const fetchFinalData = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem('FinalData');
+        const data = jsonValue != null ? JSON.parse(jsonValue) : null;
+        setFinalData(data);
+        if (data && data.Asesmen) {
+          setAsesmenCount(data.Asesmen.length);
+        } else {
+          setAsesmenCount(0);
+        }
+      } catch (error) {
+        console.error('Error fetching FinalData from AsyncStorage:', error);
+      }
+    };
+
+    fetchFinalData();
+  }, []);
+
+  const handleDeleteFinalData = async () => {
+    try {
+      await AsyncStorage.removeItem('FinalData');
+      setFinalData(null); // Menghapus data dari state setelah dihapus dari AsyncStorage
+      setAsesmenCount(0); // Reset jumlah asesmen setelah penghapusan data
+      Alert.alert('Sukses', 'Data FinalData berhasil dihapus.');
+    } catch (error) {
+      console.error('Error deleting FinalData:', error);
+      Alert.alert('Error', 'Gagal menghapus data FinalData.');
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.question}>How satisfied are you with our service?</Text>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: '#fff', borderColor: '#007bff' }]}
-          onPress={() => handleSurveySubmit('Sangat Baik')}
-        >
-          <Text style={[styles.buttonText, { color: '#007bff' }]}>Sangat Baik</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: '#fff', borderColor: '#007bff' }]}
-          onPress={() => handleSurveySubmit('Baik')}
-        >
-          <Text style={[styles.buttonText, { color: '#007bff' }]}>Baik</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: '#fff', borderColor: '#007bff' }]}
-          onPress={() => handleSurveySubmit('Cukup')}
-        >
-          <Text style={[styles.buttonText, { color: '#007bff' }]}>Cukup</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: '#fff', borderColor: '#007bff' }]}
-          onPress={() => handleSurveySubmit('Kurang')}
-        >
-          <Text style={[styles.buttonText, { color: '#007bff' }]}>Kurang</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: '#fff', borderColor: '#007bff' }]}
-          onPress={() => handleSurveySubmit('Sangat Kurang')}
-        >
-          <Text style={[styles.buttonText, { color: '#007bff' }]}>Sangat Kurang</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Data Asesmen </Text>
+      {finalData ? (
+        <View style={styles.dataContainer}>
+          {finalData && (
+            <View>
+              <Text style={styles.tableTitle}>Data Guru</Text>
+              <View style={[styles.tableHeader, styles.horizontalRow]}>
+                <Text style={[styles.headerText, styles.horizontalItem]}>Nama Siswa</Text>
+                <Text style={[styles.headerText, styles.horizontalItem]}>{finalData.Guru.nama}</Text>
+              </View>
+              <View style={[styles.tableHeader, styles.horizontalRow]}>
+                <Text style={[styles.headerText, styles.horizontalItem]}>Satuan Pendidikan</Text>
+                <Text style={[styles.headerText, styles.horizontalItem]}>{finalData.Guru.satuanPendidikan}</Text>
+              </View>
+            </View>
+          )}
+
+          {finalData.Asesmen && (
+            <View style={styles.tableContainer}>
+              <Text style={styles.tableTitle}>Data Siswa</Text>
+              <View style={styles.tableHeader}>
+                <Text style={styles.headerText}>Nama Siswa</Text>
+                <Text style={styles.headerText}>Jenis Kelamin</Text>
+                <Text style={styles.headerText}>Kelas</Text>
+                <Text style={styles.headerText}>Kategori</Text>
+              </View>
+              {finalData.Asesmen.map((item, index) => (
+                <View key={index} style={styles.tableRow}>
+                  <Text style={styles.rowText}>{item.Nama_siswa}</Text>
+                  <Text style={styles.rowText}>{item.JenisKelamin}</Text>
+                  <Text style={styles.rowText}>{item.Kelas}</Text>
+                  <Text style={styles.rowText}>{item.Kategori}</Text>
+                </View>
+              ))}
+              <TouchableOpacity style={styles.deleteLocalButton} onPress={handleDeleteFinalData}>
+                <Text style={styles.deleteButtonText}>Hapus Data Local</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          <Text style={styles.infoText}>Jumlah data Asesmen: {asesmenCount}</Text>
+        </View>
+      ) : (
+        <Text style={styles.noDataText}>FinalData tidak tersedia</Text>
+      )}
+    </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
+  deleteLocalButton: {
+    backgroundColor: 'red',
+    borderRadius: 5,
+    paddingVertical: 10,
+    marginTop: 10,
     alignItems: 'center',
-    justifyContent: 'center',
+  },
+  container: {
+    flexGrow: 1,
+    backgroundColor: '#fff',
     padding: 20,
   },
-  question: {
-    fontSize: 18,
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
   },
-  buttonContainer: {
-    width: '100%',
-  },
-  button: {
+  dataContainer: {
     borderWidth: 1,
+    borderColor: '#ccc',
     borderRadius: 5,
-    paddingVertical: 15,
-    paddingHorizontal: 20,
+    padding: 10,
     marginBottom: 10,
+  },
+  keyText: {
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  valueText: {
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  deleteButton: {
+    backgroundColor: 'red',
+    borderRadius: 5,
+    paddingVertical: 10,
+    marginTop: 10,
     alignItems: 'center',
   },
-  buttonText: {
+  deleteButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  noDataText: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  tableContainer: {
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+  },
+  tableTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  horizontalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  horizontalItem: {
+    flex: 1,
+    textAlign: 'left',
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    paddingBottom: 5,
+  },
+  headerText: {
+    fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 5,
+    paddingVertical: 5,
+  },
+  rowText: {
+    flex: 1,
+    textAlign: 'center',
+  },
+  infoText: {
+    marginTop: 10,
     fontSize: 16,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
 });
+
+export default SurveyScreen;

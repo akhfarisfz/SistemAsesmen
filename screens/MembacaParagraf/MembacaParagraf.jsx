@@ -1,19 +1,16 @@
 import { StyleSheet, Text, View } from 'react-native';
 import React, { useMemo, useState } from 'react';
 import { Button } from 'react-native-paper';
-import { useRoute } from '@react-navigation/native';
 
-const MembacaParagraf = ({navigation}) => {
-    const route = useRoute();
-    const { Kategori } = route.params; // Menggunakan Kategori sebagai nama variabel
+const MembacaParagraf = ({route,navigation}) => {
+    const {id} = route.params;
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedLetters, setSelectedLetters] = useState({});
     const [score, setScore] = useState(20);
 
     const handleSubmit = () => {
         const newKategori = 'Intervensi Khusus Tingkat Kata';
-        console.log(newKategori, "dan", score)
-        navigation.navigate('Hasil Asesmen', { Kategori: newKategori,scoreKata:score }); // Navigasi dengan Kategori yang sudah dimodifikasi
+        navigation.navigate('Hasil Asesmen', { Kategori: newKategori,id:id }); // Navigasi dengan Kategori yang sudah dimodifikasi
     };
     const dataSoalKata = useMemo(() => ([
       { id: '1', label: 'Di', value: 1 },

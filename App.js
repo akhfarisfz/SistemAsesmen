@@ -22,13 +22,14 @@ export default function App() {
         <Stack.Screen name="Home" component={HomeScreen} options={{headerShown:false}}/>
         <Stack.Screen name="Petunjuk Penggunaan" component={PetunjukPenggunaan} />
         <Stack.Screen name="Mode" component={Mode} />
-        <Stack.Screen name="Profil Guru" component={ProfilGuru} />
-        <Stack.Screen name="Profil Siswa" component={ProfilSiswa} />
+        <Stack.Screen name="Profil Guru" component={ProfilGuru} options={{headerShown:false}} />
+        <Stack.Screen name="Profil Siswa" component={ProfilSiswa}/>
         <Stack.Screen name="Tes Membaca" component={TesMembaca} />
         <Stack.Screen name="Membaca Huruf" component={MembacaHuruf} />
         <Stack.Screen name="Soal Cerita" component={SoalCerita} />
         <Stack.Screen name="Membaca Paragraf" component={MembacaParagraf} />
         <Stack.Screen name="Hasil Asesmen" component={ResultScreen} />
+        <Stack.Screen name="Tampil Hasil" component={SurveyScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

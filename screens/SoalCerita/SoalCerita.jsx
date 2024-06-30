@@ -3,7 +3,8 @@ import { StyleSheet, Text, View, Image, ScrollView } from 'react-native';
 import { Button, Checkbox, RadioButton } from 'react-native-paper';
 import gambarSoalCerita from '../../assets/GambarSoalCerita.png'
 
-const SoalCerita = ({ navigation }) => {
+const SoalCerita = ({ route, navigation }) => {
+    const { id } = route.params;
     const [currentPage, setCurrentPage] = useState(1);
     const [checkedDasar1, setCheckedDasar1] = useState(false);
     const [checkedDasar2, setCheckedDasar2] = useState(false);
@@ -23,7 +24,7 @@ const SoalCerita = ({ navigation }) => {
         } else {
             console.log("Jawaban Salah.");
             const Kategori = 'Intervensi Khusus Tingkat Cerita'
-            navigation.navigate('Hasil Asesmen', { Kategori: Kategori }); // Navigasi dengan Kategori yang sudah dimodifikasi
+            navigation.navigate('Hasil Asesmen', { Kategori: Kategori, id: id }); // Navigasi dengan Kategori yang sudah dimodifikasi
 
         }
     };
@@ -34,15 +35,21 @@ const SoalCerita = ({ navigation }) => {
         } else {
             console.log("Jawaban Salah.");
             const Kategori = 'Level Dasar'
-            navigation.navigate('Hasil Asesmen', { Kategori: Kategori }); // Navigasi dengan Kategori yang sudah dimodifikasi
+            navigation.navigate('Hasil Asesmen', { Kategori: Kategori, id: id }); // Navigasi dengan Kategori yang sudah dimodifikasi
 
         }
     };
     const handleSubmitMahir = (value) => {
         console.log('Selected Value:', selectedValue);
-        const newKategori = 'Tingkat Mahir';
-        navigation.navigate('Hasil Asesmen', { Kategori:newKategori, Jawaban: selectedValue}); // Navigasi dengan Kategori yang sudah dimodifikasi
-    
+        if (selectedValue == 'benar') {
+            let newKategori = 'Tingkat Mahir';
+            navigation.navigate('Hasil Asesmen', { Kategori: newKategori, id:id }); // Navigasi dengan Kategori yang sudah dimodifikasi
+        }
+        else{
+            let newKategori = 'Tingkat Cakap';
+            navigation.navigate('Hasil Asesmen', { Kategori: newKategori, id:id }); // Navigasi dengan Kategori yang sudah dimodifikasi
+        }
+
     };
     const nextPage = () => {
         setCurrentPage(currentPage + 1);

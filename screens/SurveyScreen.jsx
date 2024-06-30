@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Pastikan library react-native-vector-icons sudah terpasang
 
 const SurveyScreen = () => {
   const [finalData, setFinalData] = useState(null);
@@ -39,14 +40,14 @@ const SurveyScreen = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Data Asesmen </Text>
+      <Text style={styles.title}>Data Asesmen</Text>
       {finalData ? (
         <View style={styles.dataContainer}>
           {finalData && (
             <View>
               <Text style={styles.tableTitle}>Data Guru</Text>
               <View style={[styles.tableHeader, styles.horizontalRow]}>
-                <Text style={[styles.headerText, styles.horizontalItem]}>Nama Siswa</Text>
+                <Text style={[styles.headerText, styles.horizontalItem]}>Nama Guru</Text>
                 <Text style={[styles.headerText, styles.horizontalItem]}>{finalData.Guru.nama}</Text>
               </View>
               <View style={[styles.tableHeader, styles.horizontalRow]}>
@@ -83,6 +84,17 @@ const SurveyScreen = () => {
       ) : (
         <Text style={styles.noDataText}>FinalData tidak tersedia</Text>
       )}
+      
+      <View style={styles.downloadButtonsContainer}>
+        <TouchableOpacity style={styles.downloadButton}>
+          <Icon name="file-pdf-box" size={20} color="white" />
+          <Text style={styles.downloadButtonText}>Download PDF</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.downloadButton}>
+          <Icon name="file-excel-box" size={20} color="white" />
+          <Text style={styles.downloadButtonText}>Download Excel</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
@@ -187,6 +199,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     fontStyle: 'italic',
+  },
+  downloadButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  downloadButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#4CAF50',
+    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  downloadButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    marginLeft: 10,
   },
 });
 
